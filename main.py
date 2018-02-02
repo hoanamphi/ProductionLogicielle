@@ -1,4 +1,5 @@
-import sys
 
-print(sys.version);
-print("Hello World");
+fichier = open("test_val", "r");
+res = fichier.read();
+print(res);
+print(res);
