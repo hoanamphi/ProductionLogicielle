@@ -1,27 +1,24 @@
 import csv
 import sqlite3
 
-connection = sqlite3.connect("data/dataBase.db")
-#
+connection = sqlite3.connect("../data/dataBase.db")
 cursor = connection.cursor()
 
-# cursor.execute("CREATE TABLE EQUIPEMENTS")
-# cursor.execute("CREATE TABLE EQUIPEMENTS_ACTIVITES;")
-# cursor.execute("CREATE TABLE INSTALLATIONS;")
+# def csv2sql(file) :
+with open('../data/equipements_activites.csv', 'r') as f:
+    reader = csv.reader(f)
+    columns = next(reader)
 
-with open('data/equipements.csv') as csvfile:
-    equipDict = csv.DictReader(csvfile, delimiter=";")
-    for row in equipDict:
-        first_row = row
-        break
-    head = ",".join(first_row)
-    print(head)
-    cursor.execute("CREATE TABLE EQUIPEMENTS ("+head+");")
+    try:
+        cursor.execute('drop table equipements_activites')
+    except sqlite3.OperationalError:
+        print('Table non-existant: skipping drop')
 
-
-
-# with open('data/equipements_activites.csv') as csvfile:
-#     equip_actDict = csv.DictReader(csvfile, delimiter=",")
-#
-# with open('data/installations.csv') as csvfile:
-#     installDict = csv.DictReader(csvfile, delimiter=",")
+    cursor.execute('create table equipements_activites')
+    query = 'insert into equipements_activites({0}) values ({1})'
+    query = query.format(','.join(columns), ','.join('?' * len(columns)))
+    cursor = connection.cursor()
+    for data in reader:
+        print(query)
+        cursor.execute(query, data)
+    cursor.commit()
