@@ -1,17 +1,36 @@
 import csv
 import sqlite3
 
-connection = sqlite3.connect("data/dataBase.db")
-cursor = connection.cursor()
 
-def csv2sql(file) :
-    with open(file, 'r') as f:
-        reader = csv.reader(f)
+def csv2sql(csvFile, dbFile, tableName, d):
+    connection = sqlite3.connect(dbFile)
+    cursor = connection.cursor()
+
+    with open(csvFile, 'r') as f:
+        reader = csv.DictReader(f, delimiter=d)
         columns = next(reader)
 
-        query = 'insert into MyTable({0}) values ({1})'
+        try:
+            cursor.execute('drop table ' + tableName)
+        except sqlite3.OperationalError:
+            print('Table ' + tableName + ' non-existant: skipping drop')
+
+        columns = list(columns)
+        columns = map(lambda s : "`"+s+"`", columns)
+        columns = list(columns)
+
+        cursor.execute('create table ' + tableName + ' (' + ','.join(columns) + ')')
+        query = 'insert into ' + tableName + '({0}) values ({1})'
         query = query.format(','.join(columns), ','.join('?' * len(columns)))
-        cursor = connection.cursor()
+
         for data in reader:
-            cursor.execute(query, data)
-        cursor.commit()
+            print(query)
+            cursor.execute(query, list(data.values()))
+        connection.commit()
+
+
+def printCsv(csvFile, d):
+    with open(csvFile, 'r') as f:
+        reader = csv.DictReader(f, delimiter=d)
+        for row in reader:
+            print(row)
