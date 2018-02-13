@@ -14,15 +14,11 @@ with open('../data/equipements_activites.csv', 'r') as f:
     except sqlite3.OperationalError:
         print('Table non-existant: skipping drop')
 
-
-cursor.execute("CREATE TABLE EQUIPEMENTS ("+head+");")
-cursor.execute("SELECT * FROM EQUIPEMENTS")
-print(cursor.fetchone())
-
-
-
-# with open('data/equipements_activites.csv') as csvfile:
-#     equip_actDict = csv.DictReader(csvfile, delimiter=",")
-#
-# with open('data/installations.csv') as csvfile:
-#     installDict = csv.DictReader(csvfile, delimiter=",")
+    cursor.execute('create table equipements_activites')
+    query = 'insert into equipements_activites({0}) values ({1})'
+    query = query.format(','.join(columns), ','.join('?' * len(columns)))
+    cursor = connection.cursor()
+    for data in reader:
+        print(query)
+        cursor.execute(query, data)
+    cursor.commit()
