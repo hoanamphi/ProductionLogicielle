@@ -16,6 +16,7 @@ with open('data/equipements.csv') as csvfile:
         break
     head = ",".join(first_row)
     print(head)
+    cursor.execute("CREATE TABLE EQUIPEMENTS ("+head+");")
 
 
 
