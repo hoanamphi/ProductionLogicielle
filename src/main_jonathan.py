@@ -18,6 +18,10 @@ with open('data/equipements.csv') as csvfile:
     print(head)
     cursor.execute("CREATE TABLE EQUIPEMENTS ("+head+");")
 
+cursor.execute("CREATE TABLE EQUIPEMENTS ("+head+");")
+cursor.execute("SELECT * FROM EQUIPEMENTS")
+print(cursor.fetchone())
+
 
 
 # with open('data/equipements_activites.csv') as csvfile:
