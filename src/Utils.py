@@ -1,5 +1,6 @@
 import csv
 import sqlite3
+import os.path
 
 
 def csv2sql(csvFile, dbFile, tableName, d):
@@ -34,3 +35,16 @@ def printCsv(csvFile, d):
         reader = csv.DictReader(f, delimiter=d)
         for row in reader:
             print(row)
+
+def select(attribute, dbFile, tableName):
+    if os.path.isfile(dbFile):
+        connection = sqlite3.connect(dbFile)
+        cursor = connection.cursor()
+
+        try:
+            cursor.execute("SELECT "+attribute+" FROM "+tableName)
+            return cursor.fetchall()
+        except sqlite3.OperationalError as exception:
+            return str(exception)
+    else:
+        return "no such database : "+dbFile
