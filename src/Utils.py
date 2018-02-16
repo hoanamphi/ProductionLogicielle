@@ -48,3 +48,23 @@ def select(attribute, dbFile, tableName):
             return str(exception)
     else:
         return "no such database : "+dbFile
+
+def selectWhere(attribute,values, dbFile, tableName):
+    if os.path.isfile(dbFile):
+        connection = sqlite3.connect(dbFile)
+        cursor = connection.cursor()
+
+        condition = []
+        for key in values.keys():
+            condition.append(key + " = '" + str(values.get(key))+"'")
+
+        stringCondition = " and ".join(condition)
+
+
+        try:
+            cursor.execute("SELECT "+attribute+" FROM "+tableName+" WHERE "+stringCondition+" ;")
+            return cursor.fetchall()
+        except sqlite3.OperationalError as exception:
+            return str(exception)
+    else:
+        return "no such database : "+dbFile
