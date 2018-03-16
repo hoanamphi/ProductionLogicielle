@@ -36,35 +36,36 @@ def printCsv(csvFile, d):
         for row in reader:
             print(row)
 
-def select(attribute, dbFile, tableName):
+def select(attribute, tableName, dbFile):
     if os.path.isfile(dbFile):
         connection = sqlite3.connect(dbFile)
         cursor = connection.cursor()
 
         try:
-            cursor.execute("SELECT "+attribute+" FROM "+tableName)
+            cursor.execute("SELECT %s FROM %s" % (','.join(attribute), tableName))
             return cursor.fetchall()
         except sqlite3.OperationalError as exception:
             return str(exception)
     else:
         return "no such database : "+dbFile
 
-def selectWhere(attribute,values, dbFile, tableName):
+def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, conditionsValue, dbFile):
     if os.path.isfile(dbFile):
         connection = sqlite3.connect(dbFile)
         cursor = connection.cursor()
 
-        condition = []
-        for key in values.keys():
-            condition.append(key + " = '" + str(values.get(key))+"'")
-
-        stringCondition = " and ".join(condition)
-
-
+        attribute = ','.join(selectedAttribute)
+        values = ','.join('?' for i in conditionsValue)
+        query = "SELECT %s FROM %s WHERE %s IN (%s)" % (attribute, tableName, conditionAttribute, values)
         try:
-            cursor.execute("SELECT "+attribute+" FROM "+tableName+" WHERE "+stringCondition+" ;")
+            cursor.execute(query, conditionsValue,)
             return cursor.fetchall()
         except sqlite3.OperationalError as exception:
             return str(exception)
     else:
-        return "no such database : "+dbFile
+        return "no such database : " + dbFile
+
+def selectEquipementFromActivity(activityName, dbFile):
+     return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
+
+
