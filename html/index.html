@@ -9,11 +9,41 @@
     <script src="main.js"></script>
 </head>
 <body>
-    <label for="activiteInput">Activité :</label>
-    <input type="text" id="activiteInput">
-    <input type="button" id="submitButton" value="Rechercher">
-
-    <h1 id="searchFor"></h1>
-    <div id="gallery"></div>
+    <form action="/recherche" method="post">
+        <label for="INomActivite">Nom d'activité :</label>
+        <input type="text" name="INomActivite">
+        <br>
+        <br>
+        <label for="INumCommune">Numéro INSEE de commune :</label>
+        <input type="number" name="INumCommune" min="44001" max="85307" value="44001">
+        <br>
+        <br>
+        <label for="INomCommune">Nom de commune :</label>
+        <input type="text" name="INomCommune">
+        <br>
+        <br>
+        <label for="INomInstallation">Nom de l'installation :</label>
+        <input type="text" name="INomInstallation">
+        <br>
+        <br>
+        <label for="INiveau">Niveau :</label>
+        <input type="text" name="INiveau">
+        <br>
+        <br>
+        <label for="IParking">Nombre de places de parking :</label>
+        <input type="text" name="IParking">
+        <br>
+        <br>
+        <label for="IInternet">Présence d'un accès Internet :</label>
+        <input type="text" name="IInternet">
+        <br>
+        <br>
+        <label for="IDeservi">Déservi par :</label>
+        <input type="text" name="IDeservi">
+        <br>
+        <br>
+        <input type="submit" name="submitButton" value="Rechercher">
+        <br>
+    </form>
 </body>
 </html>
