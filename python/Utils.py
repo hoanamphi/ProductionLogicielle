@@ -1,7 +1,27 @@
 import csv
+import requests
 import sqlite3
 import os.path
 
+tables = {['communes'], ['activites_generales'], ['niveau'], ['installations'], ['equipements'], ['activites'])
+#Clés étrangère de installations vers communes, de equipements vers installations, de activites vers equipements, de activites vers activites_generales, de activites vers niveau, de activites vers communes
+
+def makeTables():
+    cursor = connection.cursor()
+    try:
+        cursor.execute('drop table ' + tableName)
+    except sqlite3.OperationalError:
+        print('Table ' + tableName + ' non-existant: skipping drop')
+
+def dictionaryToSQL(array, table, connection):
+    cursor = connection.cursor()
+
+def dbcreator(dbPath):
+    connection = sqlite3.connect(dbPath)
+
+    installations = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J335/installations_table/content/?format=json').json()
+    equipements = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J336/equipements_table/content/?format=json').json()
+    activites = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J334/equipements_activites_table/content/?format=json').json()
 
 def csv2sql(csvFile, dbFile, tableName, d):
     connection = sqlite3.connect(dbFile)
@@ -67,5 +87,3 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
 
 def selectEquipementFromActivity(activityName, dbFile):
      return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
-
-
