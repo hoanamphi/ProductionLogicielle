@@ -1,6 +1,6 @@
 # pylint: disable=no-member
 
-from bottle import get, post, run, static_file, request, template, route
+from bottle import get, post, run, static_file, request, template, route, response
 from python.Utils import *
 from json import *
 
@@ -26,6 +26,7 @@ def search():
     id = request.forms.get('id')
     data = getCriteriaList(int(id))
     json = dumps(data)
+    response.content_type = 'application/json'
     # return template('result.tpl', list=json)
     return json #je sais pas si ça marche comme ça
 
