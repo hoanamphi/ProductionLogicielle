@@ -16,15 +16,15 @@
         <div id="form" style="padding:40px;">
             <h2 class="text-center" style="margin-bottom:0px;">Recherche d'activité</h2>
             <h2 class="text-center" style="font-size:16px;height:-7px;color:rgb(103,115,128);">Pays de la Loire</h2>
-            <div class="form-group"><img class="img-thumbnail" src="assets/img/basketball.png" style="width:38px;position:relative;margin-left:-375px;"><select id="#discipline_select" class="form-control" name="discipline" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Discipline</option></select></div>
+            <div class="form-group"><img class="img-thumbnail" src="assets/img/basketball.png" style="width:38px;position:relative;margin-left:-375px;"><select class="form-control" name="discipline" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Discipline</option><optgroup id="discipline_select" label="Discipline"></optgroup></select></div>
             <div
-                class="form-group"><img class="img-thumbnail" src="assets/img/city.png" style="width:38px;position:relative;margin-left:-375px;"><select id="#commune_select" class="form-control" name="commune" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Commune</option></select></div>
+                class="form-group"><img class="img-thumbnail" src="assets/img/city.png" style="width:38px;position:relative;margin-left:-375px;"><select class="form-control" name="commune" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Commune</option><optgroup id="commune_select" label="Commune"></optgroup></select></div>
     <div
-        class="form-group"><img class="img-thumbnail" src="assets/img/dumbbell.png" style="width:38px;position:relative;margin-left:-375px;"><select id="#niveau_select" class="form-control" name="niveau" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Niveau</option></select></div>
+        class="form-group"><img class="img-thumbnail" src="assets/img/dumbbell.png" style="width:38px;position:relative;margin-left:-375px;"><select class="form-control" name="niveau" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Niveau</option><optgroup id="niveau_select" label="Niveau"></optgroup></select></div>
         <div
-            class="form-group"><img class="img-thumbnail" src="assets/img/train.png" style="width:38px;position:relative;margin-left:-375px;"><select id="#desservissement_select" class="form-control" name="desservissement" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;">
+            class="form-group"><img class="img-thumbnail" src="assets/img/train.png" style="width:38px;position:relative;margin-left:-375px;"><select class="form-control" name="desservissement" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;">
                 <option value="" selected="">Desservissement</option>
-                <optgroup label="Desservissement">
+                <optgroup id="desservissement_select" label="Desservissement">
                     <option value="metro">Métro</option>
                     <option value="bus">Bus</option>
                     <option value="tram">Tramway</option>
@@ -34,13 +34,18 @@
                 </optgroup>
             </select></div>
             <div
-                class="form-group"><img class="img-thumbnail" src="assets/img/label.png" style="margin-left:-375px;width:38px;"><input class="form-control" type="text" name="nominstallation" placeholder="Nom de l'installation" style="width:350px;margin-left:50px;margin-top:-38px;"></div>
+                class="form-group"><img class="img-thumbnail" src="assets/img/label.png" style="margin-left:-375px;width:38px;"><select class="form-control" name="niveau" style="width:350px;margin-left:50px;position:relative;margin-top:-38px;"><option value="" selected="">Nom de l'installation</option><optgroup id="nominstallation_select" label="Nom de l'installation"></optgroup></select></div>
                 <div
                     class="form-group"><button id="submit" class="btn btn-primary">Rechercher</button></div>
         </div>
                     </div>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
+
+                    
+        <div id="results"></div>
+    
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

@@ -3,6 +3,7 @@ import requests
 import sqlite3
 import os.path
 
+# tables = {['communes'], ['activites_generales'], ['niveau'], ['installations'], ['equipements'], ['activites'])
 #Clés étrangère de installations vers communes, de equipements vers installations, de activites vers equipements, de activites vers activites_generales, de activites vers niveau, de activites vers communes
 
 # def makeTables():
@@ -85,18 +86,21 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
         return "no such database : " + dbFile
 
 def selectEquipementFromActivity(activityName, dbFile):
-    return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
+     return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
 
 # effectuer la selectionde critères
-def selectCriteria(criteria):
-    database = "../data/dataBase.db"
-    return select([criteria], "EQUIPEMENTS_ACTIVITES", database)
+def selectCriteria(criteria, tableName):
+    database = "data/database.db"
+    return select([criteria], tableName, database)
 
-idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib"}
+idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib", 3:"InsNom"}
 
 def getCriteriaList(id):
     if(id in idCriteriaTable.keys()):
-        return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id])))
+        if(id < 3):
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "EQUIPEMENTS_ACTIVITES")))
+        else:
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "EQUIPEMENTS")))
     else:
         return "INVALID ID"
 
