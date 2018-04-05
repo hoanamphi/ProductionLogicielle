@@ -2,6 +2,7 @@
 
 from bottle import get, post, run, static_file, request, template, route
 from python.Utils import *
+from json import *
 
 # CSS routes
 @route('/assets/css/<file>')
@@ -19,15 +20,13 @@ def search_page():
 
 
 # Recuperer les listes de critères
-@get('/api/list')
-def search_page():
-    return static_file('list_formulaire.html', '../html/')
 
 @post('/api/list')
 def search():
     id = request.forms.get('id')
     data = getCriteriaList(int(id))
     json = dumps(data)
-    return template('result.tpl', list=json)
+    # return template('result.tpl', list=json)
+    return json #je sais pas si ça marche comme ça
 
 run(host='localhost', port=8080, debug=True)
