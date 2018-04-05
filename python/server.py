@@ -1,8 +1,9 @@
 # pylint: disable=no-member
 
 from bottle import get, post, run, static_file, request, template, route
-from python.Utils import *
+from Utils import *
 from json import *
+
 
 # CSS routes
 @route('/assets/css/<file>')
@@ -14,13 +15,17 @@ def css(file):
 def img(file):
     return static_file(file, 'html/assets/img/')
 
+# JS routes
+@route('/assets/js/<file>')
+def js(file):
+    return static_file(file, 'html/assets/js/')
+
+
 @get('/recherche')
 def search_page():
     return static_file('recherche.html', 'html/')
 
-
 # Recuperer les listes de critères
-
 @post('/api/list')
 def search():
     id = request.forms.get('id')

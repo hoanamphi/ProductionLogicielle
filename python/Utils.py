@@ -3,7 +3,6 @@ import requests
 import sqlite3
 import os.path
 
-tables = {['communes'], ['activites_generales'], ['niveau'], ['installations'], ['equipements'], ['activites'])
 #Clés étrangère de installations vers communes, de equipements vers installations, de activites vers equipements, de activites vers activites_generales, de activites vers niveau, de activites vers communes
 
 # def makeTables():
@@ -86,7 +85,7 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
         return "no such database : " + dbFile
 
 def selectEquipementFromActivity(activityName, dbFile):
-     return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
+    return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
 
 # effectuer la selectionde critères
 def selectCriteria(criteria):

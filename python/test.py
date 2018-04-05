@@ -1,3 +1,2 @@
-import Utils
-
-Utils.dbcreator('../data/dataBase.db')
+import sys
+print (sys.version)
