@@ -6,12 +6,12 @@ import os.path
 tables = {['communes'], ['activites_generales'], ['niveau'], ['installations'], ['equipements'], ['activites'])
 #Clés étrangère de installations vers communes, de equipements vers installations, de activites vers equipements, de activites vers activites_generales, de activites vers niveau, de activites vers communes
 
-def makeTables():
-    cursor = connection.cursor()
-    try:
-        cursor.execute('drop table ' + tableName)
-    except sqlite3.OperationalError:
-        print('Table ' + tableName + ' non-existant: skipping drop')
+# def makeTables():
+#     cursor = connection.cursor()
+#     try:
+#         cursor.execute('drop table ' + tableName)
+#     except sqlite3.OperationalError:
+#         print('Table ' + tableName + ' non-existant: skipping drop')
 
 def dictionaryToSQL(array, table, connection):
     cursor = connection.cursor()
@@ -62,7 +62,7 @@ def select(attribute, tableName, dbFile):
         cursor = connection.cursor()
 
         try:
-            cursor.execute("SELECT %s FROM %s" % (','.join(attribute), tableName))
+            cursor.execute("SELECT DISTINCT %s FROM %s" % (','.join(attribute), tableName))
             return cursor.fetchall()
         except sqlite3.OperationalError as exception:
             return str(exception)
@@ -87,3 +87,22 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
 
 def selectEquipementFromActivity(activityName, dbFile):
      return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
+
+# effectuer la selectionde critères
+def selectCriteria(criteria):
+    database = "../data/dataBase.db"
+    return select([criteria], "EQUIPEMENTS_ACTIVITES", database)
+
+idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib"}
+
+def getCriteriaList(id):
+    if(id in idCriteriaTable.keys()):
+        return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id])))
+    else:
+        return "INVALID ID"
+
+def transformFromTupleToArray(tuple):
+    if(isinstance(tuple, str)):
+        return [tuple]
+    else:
+        return list(sum(tuple, ()))
