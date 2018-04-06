@@ -9,13 +9,13 @@ class DbCreatorException(Exception):
 def dataToSQL(columns, datalist, table, cursor):
 	query = 'insert into %s ({0}) values ({1})' % (table)
 	query = query.format(','.join(columns), ','.join('?' * len(columns)))
-	for data in datalist:	
+	for data in datalist:
 		cursor.execute(query, list(data.values()))
-	
+
 def makeIndex(values):
 	for i, value in enumerate(values):
 		value['manualIndex'] = i
-	
+
 def makeTables(connection, tablesToProcess):
 	cursor = connection.cursor()
 	tables = {}
@@ -52,7 +52,7 @@ def makeTables(connection, tablesToProcess):
 		columns = list(tables[name]['values'][0].keys())
 		data = list(tables[name]['values'])
 		dataToSQL(columns, data, name, cursor)
-	
+
 def getCommunes(installations, equipements, activites):
 	communes = {}
 	for installation in installations:
@@ -67,7 +67,7 @@ def getCommunes(installations, equipements, activites):
 		communes[activite['ComInsee']] = {'ComInsee': activite['ComInsee'], 'ComLib': activite['ComLib']}
 		del activite['ComLib']
 	return list(communes.values())
-	
+
 def getDisciplines(activites):
 	disciplines = {}
 	for activite in activites:
@@ -75,7 +75,7 @@ def getDisciplines(activites):
 		del activite['ActLib']
 	del disciplines[None]
 	return list(disciplines.values())
-	
+
 def getNiveaux(activites):
 	niveaux = {}
 	for activite in activites:
@@ -89,28 +89,38 @@ def getNiveaux(activites):
 	del niveaux['Non défini']
 	return list(niveaux.values())
 
+def removeWhitespaces(listToStrip):
+    for toStrip in listToStrip:
+        for entry in toStrip:
+            for key, value in { k : v for k,v in entry.items() }.items():
+                if(isinstance(value, str)):
+                    entry[key] = value.strip()
+
+
 def dbCreatorImpl(connection):
 	installations = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J335/installations_table/content/?format=json').json()['data']
 	equipements = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J336/equipements_table/content/?format=json').json()['data']
 	#equipements = [{'EquipementId': '00', 'ComInsee': '44000', 'ComLib': '00', 'InsNumeroInstall': '00000'}]
 	activites = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J334/equipements_activites_table/content/?format=json').json()['data']
-	
+
 	communes = getCommunes(installations, equipements, activites)
 	disciplines = getDisciplines(activites)
 	niveaux = getNiveaux(activites)
-	
+
+	removeWhitespaces([installations, equipements, activites, communes, disciplines, niveaux])
+
 	tables = {'communes':{'primary_key': 'ComInsee', 'foreign_keys':[], 'values':communes},
 	'disciplines':{'primary_key': 'ActCode', 'foreign_keys':[], 'values':disciplines},
 	'niveaux':{'primary_key': 'ActNivId', 'foreign_keys':[], 'values':niveaux},
 	'installations':{'primary_key': 'InsNumeroInstall', 'foreign_keys':[{'src': 'ComInsee', 'dst': 'communes'}], 'values':installations},
 	'equipements':{'primary_key': 'EquipementId', 'foreign_keys':[{'src': 'ComInsee', 'dst': 'communes'}, {'src': 'InsNumeroInstall', 'dst': 'installations'}], 'values':equipements},
 	'activites':{'primary_key': 'manualIndex', 'foreign_keys':[{'src': 'ComInsee', 'dst': 'communes'}, {'src': 'EquipementId', 'dst': 'equipements'}, {'src': 'ActCode', 'dst': 'disciplines'}, {'src': 'ActNivId', 'dst': 'niveaux'}], 'values':activites}}
-	
+
 	makeTables(connection, tables)
-	
+
 def dbCreator(dbPath):
 	connection = sqlite3.connect(dbPath)
-	
+
 	try:
 		dbCreatorImpl(connection)
 		connection.commit()
