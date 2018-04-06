@@ -130,11 +130,30 @@ def select(attribute, tableName, dbFile):
     else:
         return "no such database : "+dbFile
 
+def selectCriteria(criteria, tableName):
+    database = "../data/dataBase.db"
+    return select([criteria], tableName, database)
+
+def getCriteriaList(id):
+    if(id in idCriteriaTable.keys()):
+        if(id == 0):
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "communes")))
+        if (id == 1):
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "disciplines")))
+        if (id == 2):
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "niveaux")))
+        if (id == 3):
+            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "equipements")))
+    else:
+        return "INVALID ID"
+
+#
 def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, conditionsValue, dbFile):
     if os.path.isfile(dbFile):
         connection = sqlite3.connect(dbFile)
         cursor = connection.cursor()
-
+        if(len(conditionsValue)>100):
+            conditionsValue = conditionsValue[:100]
         attribute = ','.join(selectedAttribute)
         values = ','.join('?' for i in conditionsValue)
         query = "SELECT %s FROM %s WHERE %s IN (%s)" % (attribute, tableName, conditionAttribute, values)
@@ -145,28 +164,94 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
             return str(exception)
     else:
         return "no such database : " + dbFile
-
-def selectEquipementFromActivity(activityName, dbFile):
-     return selectWhere1Attribute(["EquipementId"], "EQUIPEMENTS_ACTIVITES", "ActLib", activityName, dbFile)
-
-# effectuer la selectionde critères
-def selectCriteria(criteria, tableName):
-    database = "data/database.db"
-    return select([criteria], tableName, database)
-
-idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib", 3:"InsNom"}
-
-def getCriteriaList(id):
-    if(id in idCriteriaTable.keys()):
-        if(id < 3):
-            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "EQUIPEMENTS_ACTIVITES")))
-        else:
-            return sorted(transformFromTupleToArray(selectCriteria(idCriteriaTable[id], "EQUIPEMENTS")))
-    else:
-        return "INVALID ID"
-
+#
 def transformFromTupleToArray(tuple):
     if(isinstance(tuple, str)):
         return [tuple]
     else:
         return list(sum(tuple, ()))
+#
+def selectNumeroIns(activityName, commune, niveau):
+    Equipementid = []
+    db = "../data/dataBase.db"
+    if(activityName != ""):
+        code = transformFromTupleToArray(selectWhere1Attribute(["ActCode"], "disciplines", "ActLib", [activityName], db))
+        result = selectWhere1Attribute(["EquipementId"], "activites", "ActCode", code, db)
+        if(len(Equipementid) != 0):
+            Equipementid = np.intersect1d(Equipementid, transformFromTupleToArray(result))
+        else:
+            Equipementid = transformFromTupleToArray(result)
+
+    if (niveau != ""):
+        code = transformFromTupleToArray(
+            selectWhere1Attribute(["ActNivId"], "niveaux", "ActNivLib", [niveau], db))
+        result = selectWhere1Attribute(["EquipementId"], "activites", "ActNivId", code, db)
+        if (len(Equipementid) != 0):
+            Equipementid = np.intersect1d(Equipementid,transformFromTupleToArray(result))
+        else:
+            Equipementid = transformFromTupleToArray(result)
+
+    numeroIns = transformFromTupleToArray(selectWhere1Attribute(["InsNumeroInstall"], "equipements", "EquipementId", Equipementid, db))
+
+    if (commune != ""):
+        code = transformFromTupleToArray(
+            selectWhere1Attribute(["ComInsee"], "communes", "ComLib", [commune], db))
+        result = selectWhere1Attribute(["InsNumeroInstall"], "installations", "ComInsee", code, db)
+        if (len(numeroIns) != 0):
+            numeroIns = np.intersect1d(numeroIns, transformFromTupleToArray(result))
+        else:
+            numeroIns = transformFromTupleToArray(result)
+
+    return numeroIns
+
+def selectInstallation(nom_install):
+    numeroIns = []
+    db = "../data/dataBase.db"
+
+    if (nom_install != ""):
+        result = selectWhere1Attribute(["InsNumeroInstall"], "equipements", "InsNom", [nom_install], db)
+        if (len(numeroIns) != 0):
+            numeroIns = np.intersect1d(numeroIns, transformFromTupleToArray(result))
+        else:
+            numeroIns = transformFromTupleToArray(result)
+    return numeroIns
+
+def selectInstallationInfos(numeroIns, desserte):
+    if(len(numeroIns)) == 0:
+        return []
+    else:
+        db = "../data/dataBase.db"
+        result = []
+        for numero in numeroIns:
+            tmp = []
+            insNom = transformFromTupleToArray(selectWhere1Attribute(["InsNom"], "equipements", "InsNumeroInstall", [numero], db))
+            tmp.insert(0,insNom[0])
+            comInsee = transformFromTupleToArray(selectWhere1Attribute(["ComInsee"], "equipements", "InsNumeroInstall", [numero], db))
+            comLib = transformFromTupleToArray(selectWhere1Attribute(["ComLib"], "communes", "ComInsee", comInsee, db))
+            tmp.insert(1, comLib[0])
+            infos = ["InsCodePostal", "InsLieuDit", "InsLibelleVoie", "InsNoVoie", "InsInternat", "InsNbPlaceParking"]
+            for item in transformFromTupleToArray(
+                    selectWhere1Attribute(infos, "installations", "InsNumeroInstall", [numero], db)):
+                tmp.append(item)
+            result.append(tmp)
+        return result
+
+def checkDesserte(numeroIns , desserte):
+    if(desserte != ""):
+        db = "../data/dataBase.db"
+        table = "installations"
+        if(desserte == "bus"):
+            test = selectWhere1Attribute(["InsTransportBus"], table, "InsNumeroInstall", numeroIns, db)
+        if (desserte == "tram"):
+            test = selectWhere1Attribute(["InsTransportTram"], table, "InsNumeroInstall", numeroIns, db)
+        if (desserte == "train"):
+            test = selectWhere1Attribute(["InsTransportTrain"], table, "InsNumeroInstall", numeroIns, db)
+        if (desserte == "autre"):
+            test = selectWhere1Attribute(["InsTransportAutre"], table, "InsNumeroInstall", numeroIns, db)
+        if (desserte == "metro"):
+            test = selectWhere1Attribute(["InsTransportMetro"], table, "InsNumeroInstall", numeroIns, db)
+        if (desserte == "bateau"):
+            test = selectWhere1Attribute(["InsTransportBateau"], table, "InsNumeroInstall", numeroIns, db)
+        return transformFromTupleToArray(test)
+    else:
+        return "Pas de desserte"

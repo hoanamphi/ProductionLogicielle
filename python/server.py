@@ -49,4 +49,29 @@ def login():
     response.content_type = 'application/json'
     return json
 
+@post('/search')
+def search():
+    discipline = request.forms.get('discipline')
+    commune = request.forms.get('commune')
+    niveau = request.forms.get('niveau')
+    desserte = request.forms.get('desserte')
+    nominstall = request.forms.get('nom_installation')
+
+    install1 =  selectNumeroIns(discipline, commune, niveau)
+    install2 = selectInstallation(nominstall)
+    if(len(install1) == 0):
+        if(len(install2) == 0):
+            data = []
+        else:
+            data = selectInstallationInfos(install2, desserte)
+    else:
+        if(len(install2) == 0):
+            data = selectInstallationInfos(install1, desserte)
+        else:
+            data = selectInstallationInfos(np.intersect1d(install1, install2), desserte)
+
+    json = dumps(data, ensure_ascii=False)
+    response.content_type = 'application/json'
+    return json
+
 run(host='localhost', port=8080, debug=True)
