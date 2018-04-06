@@ -3,6 +3,7 @@
 from bottle import get, post, run, static_file, request, template, route, response
 from Utils import *
 from json import *
+import numpy as np
 
 # CSS routes
 @route('/assets/css/<file>')
@@ -49,15 +50,15 @@ def login():
     response.content_type = 'application/json'
     return json
 
-@post('/search')
-def search():
+@post('/api/search')
+def results():
     discipline = request.forms.get('discipline')
     commune = request.forms.get('commune')
     niveau = request.forms.get('niveau')
     desserte = request.forms.get('desserte')
     nominstall = request.forms.get('nom_installation')
 
-    install1 =  selectNumeroIns(discipline, commune, niveau)
+    install1 = selectNumeroIns(discipline, commune, niveau)
     install2 = selectInstallation(nominstall)
     if(len(install1) == 0):
         if(len(install2) == 0):

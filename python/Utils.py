@@ -1,6 +1,10 @@
 import requests
 import sqlite3
 import os.path
+import numpy as np
+
+DATABASE = "data/database.db"
+
 
 class DbCreatorException(Exception):
     pass
@@ -131,7 +135,7 @@ def select(attribute, tableName, dbFile):
         return "no such database : "+dbFile
 
 def selectCriteria(criteria, tableName):
-    database = "../data/dataBase.db"
+    database = DATABASE
     return select([criteria], tableName, database)
 
 idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib", 3:"InsNom"}
@@ -175,7 +179,7 @@ def transformFromTupleToArray(tuple):
 #
 def selectNumeroIns(activityName, commune, niveau):
     Equipementid = []
-    db = "../data/dataBase.db"
+    db = DATABASE
     if(activityName != ""):
         code = transformFromTupleToArray(selectWhere1Attribute(["ActCode"], "disciplines", "ActLib", [activityName], db))
         result = selectWhere1Attribute(["EquipementId"], "activites", "ActCode", code, db)
@@ -208,7 +212,7 @@ def selectNumeroIns(activityName, commune, niveau):
 
 def selectInstallation(nom_install):
     numeroIns = []
-    db = "../data/dataBase.db"
+    db = DATABASE
 
     if (nom_install != ""):
         result = selectWhere1Attribute(["InsNumeroInstall"], "equipements", "InsNom", [nom_install], db)
@@ -222,7 +226,7 @@ def selectInstallationInfos(numeroIns, desserte):
     if(len(numeroIns)) == 0:
         return []
     else:
-        db = "../data/dataBase.db"
+        db = DATABASE
         result = []
         for numero in numeroIns:
             tmp = []
@@ -235,12 +239,14 @@ def selectInstallationInfos(numeroIns, desserte):
             for item in transformFromTupleToArray(
                     selectWhere1Attribute(infos, "installations", "InsNumeroInstall", [numero], db)):
                 tmp.append(item)
+            tmp.append(checkDesserte(numero, desserte)[0])
             result.append(tmp)
         return result
 
 def checkDesserte(numeroIns , desserte):
     if(desserte != ""):
-        db = "../data/dataBase.db"
+        print("WOLOOOOOOOOOOOOOOOOOOo")
+        db = DATABASE
         table = "installations"
         if(desserte == "bus"):
             test = selectWhere1Attribute(["InsTransportBus"], table, "InsNumeroInstall", numeroIns, db)
@@ -254,6 +260,7 @@ def checkDesserte(numeroIns , desserte):
             test = selectWhere1Attribute(["InsTransportMetro"], table, "InsNumeroInstall", numeroIns, db)
         if (desserte == "bateau"):
             test = selectWhere1Attribute(["InsTransportBateau"], table, "InsNumeroInstall", numeroIns, db)
+        print(test)
         return transformFromTupleToArray(test)
     else:
-        return "Pas de desserte"
+        return ["Pas de desserte"]

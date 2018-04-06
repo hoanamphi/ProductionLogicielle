@@ -160,25 +160,21 @@ $(document).ready(() => {
             url: 'http://localhost:8080/api/search',
             type: 'POST',
             dataType: 'json',
-            data: `discipline=${discipline}
-                &commune=${commune}
-                &niveau=${niveau}
-                &desservissement=${desservissement}
-                &nom_installation=${nominstallation}`,
+            data: `discipline=${discipline}&commune=${commune}&niveau=${niveau}&desserte=${desservissement}&nom_installation=${nominstallation}`,
             
             success: (json, status) => {
                 json.forEach(result => {
                     $('#result-table').append(`
                         <tr>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
-                            <th>${json}</th>
+                            <th>${result[0] != null ? result[0] : ''}</th>
+                            <th>${result[1] != null ? result[1] : ''}</th>
+                            <th>${result[2] != null ? result[2] : ''}</th>
+                            <th>${result[3] != null ? result[3] : ''}</th>
+                            <th>${result[4] != null ? result[4] : ''}</th>
+                            <th>${result[5] != null ? result[5] : ''}</th>
+                            <th>${result[6] != null ? result[6] : ''}</th>
+                            <th>${result[7] != null ? result[7] : ''}</th>
+                            <th>${result[8] != null ? result[8] : ''}</th>
                         </tr>
                     `);
                 });
