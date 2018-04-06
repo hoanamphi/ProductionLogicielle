@@ -118,7 +118,7 @@ $(document).ready(() => {
             <div id="results">   
                 <div class="contact-clean" style="background-color:rgb(25,25,25);padding-top:20px;height:120px;padding-bottom:0;">
                     <div id="form" style="padding:20px;">
-                        <h2 class="text-center" style="margin-bottom:0px;">Résultats de recherche</h2>
+                        <h2 class="text-center" style="margin-bottom:0px;" id="state">Chargement...</h2>
                         </div>
                 </div>
 
@@ -163,6 +163,9 @@ $(document).ready(() => {
             data: `discipline=${discipline}&commune=${commune}&niveau=${niveau}&desserte=${desservissement}&nom_installation=${nominstallation}`,
             
             success: (json, status) => {
+                console.log(json)
+                $('#state').text("Résultats de recherche");
+
                 json.forEach(result => {
                     $('#result-table').append(`
                         <tr>

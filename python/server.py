@@ -44,7 +44,7 @@ def login():
     mdp = request.forms.get('mdp')
     if (id == "admin" and mdp == "1234"):
         json = dumps("true", ensure_ascii=False)
-        # dbCreator('data/database.db')
+        dbCreator('data/database.db')
     else:
         json = dumps("false", ensure_ascii=False)
     response.content_type = 'application/json'
