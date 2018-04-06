@@ -134,6 +134,8 @@ def selectCriteria(criteria, tableName):
     database = "../data/dataBase.db"
     return select([criteria], tableName, database)
 
+idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib", 3:"InsNom"}
+
 def getCriteriaList(id):
     if(id in idCriteriaTable.keys()):
         if(id == 0):
