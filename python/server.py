@@ -20,10 +20,10 @@ def img(file):
 def js(file):
     return static_file(file, 'html/assets/js/')
 
+# Routes for GET
 @get('/recherche')
 def search_page():
     return static_file('recherche.html', 'html/')
-
 @get('/connexion')
 def connexion():
     return static_file('connexion.html', 'html/')
@@ -50,6 +50,7 @@ def login():
     response.content_type = 'application/json'
     return json
 
+# Recherche d'installations
 @post('/api/search')
 def results():
     discipline = request.forms.get('discipline')
@@ -75,4 +76,5 @@ def results():
     response.content_type = 'application/json'
     return json
 
+# Démarrage du serveur
 run(host='localhost', port=8080, debug=True)

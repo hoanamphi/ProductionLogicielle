@@ -3,13 +3,14 @@ import sqlite3
 import os.path
 import numpy as np
 
+# Constante pour le chemin de la base de données
 DATABASE = "data/database.db"
 
-
+# Exception levée par dbcreator
 class DbCreatorException(Exception):
     pass
 
-
+# Prends une liste de dictionnaires et la convertit en tables SQL
 def dataToSQL(columns, datalist, table, cursor):
 	query = 'insert into %s ({0}) values ({1})' % (table)
 	query = query.format(','.join(columns), ','.join('?' * len(columns)))
@@ -17,10 +18,12 @@ def dataToSQL(columns, datalist, table, cursor):
 	for data in datalist:
 		cursor.execute(query, list(data.values()))
 
+# Créé un index pour les données n'en disposant pas
 def makeIndex(values):
 	for i, value in enumerate(values):
 		value['manualIndex'] = i
 
+# Prends une configuration de base de données et créé la base de données
 def makeTables(connection, tablesToProcess):
 	cursor = connection.cursor()
 	tables = {}
@@ -58,6 +61,7 @@ def makeTables(connection, tablesToProcess):
 		data = list(tables[name]['values'])
 		dataToSQL(columns, data, name, cursor)
 
+# Renvoie des données de communes à partir de données d'installations, d'équipements et d'activités
 def getCommunes(installations, equipements, activites):
 	communes = {}
 	for installation in installations:
@@ -73,6 +77,7 @@ def getCommunes(installations, equipements, activites):
 		del activite['ComLib']
 	return list(communes.values())
 
+# Renvoie des données de disciplines à partir de données d'activités
 def getDisciplines(activites):
 	disciplines = {}
 	for activite in activites:
@@ -81,6 +86,7 @@ def getDisciplines(activites):
 	del disciplines[None]
 	return list(disciplines.values())
 
+# Renvoie des données de niveaux sportifs à partir de données d'activités
 def getNiveaux(activites):
 	niveaux = {}
 	for activite in activites:
@@ -94,6 +100,7 @@ def getNiveaux(activites):
 	del niveaux['Non défini']
 	return list(niveaux.values())
 
+# Trim() / Règle les problèmes de formatage de la BD
 def removeWhitespaces(listToStrip):
     for toStrip in listToStrip:
         for entry in toStrip:
@@ -101,7 +108,7 @@ def removeWhitespaces(listToStrip):
                 if(isinstance(value, str)):
                     entry[key] = value.strip()
 
-
+# Créé la base de données
 def dbCreatorImpl(connection):
 	installations = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J335/installations_table/content/?format=json').json()['data']
 	equipements = requests.get('http://data.paysdelaloire.fr/api/publication/23440003400026_J336/equipements_table/content/?format=json').json()['data']
@@ -114,6 +121,10 @@ def dbCreatorImpl(connection):
 
 	removeWhitespaces([installations, equipements, activites, disciplines, niveaux])
 
+    # Tableau de configuration de la base de données, le format est :
+    # Clé: nom de la table
+    # Valeurs: Dictionnaire contenant l'information sur la clé primaire, une liste des contraintes de clés secondaires et une liste des valeurs
+    # Les contraintes de clés secondaires sont un dictionnaire contenant la clé src correspondant à la colonne source et dst correspondant à la table destination
 	tables = {'communes':{'primary_key': 'ComInsee', 'foreign_keys':[], 'values':communes},
 	'disciplines':{'primary_key': 'ActCode', 'foreign_keys':[], 'values':disciplines},
 	'niveaux':{'primary_key': 'ActNivId', 'foreign_keys':[], 'values':niveaux},
@@ -123,6 +134,7 @@ def dbCreatorImpl(connection):
 
 	makeTables(connection, tables)
 
+# Wrapper de dbcreatorimpl ci dessus
 def dbCreator(dbPath):
 	connection = sqlite3.connect(dbPath)
 
@@ -132,7 +144,7 @@ def dbCreator(dbPath):
 	except Exception as e:
 		connection.rollback()
 
-
+# Méthode qui effectue un select dans la BD
 def select(attribute, tableName, dbFile):
     if os.path.isfile(dbFile):
         connection = sqlite3.connect(dbFile)
@@ -146,12 +158,14 @@ def select(attribute, tableName, dbFile):
     else:
         return "no such database : "+dbFile
 
+# Retourne la liste des valeurs d'un critère
 def selectCriteria(criteria, tableName):
     database = DATABASE
     return select([criteria], tableName, database)
 
 idCriteriaTable = {0:"ComLib", 1:"ActLib", 2:"ActNivLib", 3:"InsNom"}
 
+# Retourne la liste des valeurs d'un critère à partir de son identifiant
 def getCriteriaList(id):
     if(id in idCriteriaTable.keys()):
         if(id == 0):
@@ -165,7 +179,7 @@ def getCriteriaList(id):
     else:
         return "INVALID ID"
 
-#
+# Effectue un "SELECT WHERE" dans la bd
 def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, conditionsValue, dbFile):
     if os.path.isfile(dbFile):
         connection = sqlite3.connect(dbFile)
@@ -182,13 +196,15 @@ def selectWhere1Attribute(selectedAttribute, tableName, conditionAttribute, cond
             return str(exception)
     else:
         return "no such database : " + dbFile
-#
+
+# Transforme une list de tuples en tableau
 def transformFromTupleToArray(tuple):
     if(isinstance(tuple, str)):
         return [tuple]
     else:
         return list(sum(tuple, ()))
-#
+
+# Sélectionne le numéro de l'installation à partir d'une discipline, commune et niveau
 def selectNumeroIns(activityName, commune, niveau):
     Equipementid = []
     db = DATABASE
@@ -222,6 +238,7 @@ def selectNumeroIns(activityName, commune, niveau):
 
     return numeroIns
 
+# Sélectionne une installation à partir de son nom
 def selectInstallation(nom_install):
     numeroIns = []
     db = DATABASE
@@ -234,6 +251,7 @@ def selectInstallation(nom_install):
             numeroIns = transformFromTupleToArray(result)
     return numeroIns
 
+# Sélectionne les informations d'une installation à partir de son numéro
 def selectInstallationInfos(numeroIns, desserte):
     if(len(numeroIns)) == 0:
         return []
@@ -255,6 +273,7 @@ def selectInstallationInfos(numeroIns, desserte):
             result.append(tmp)
         return result
 
+# Vérifie si la desserte choisie est valide
 def checkDesserte(numeroIns , desserte):
     if(desserte != ""):
         print("WOLOOOOOOOOOOOOOOOOOOo")
