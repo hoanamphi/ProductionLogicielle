@@ -13,6 +13,7 @@ class DbCreatorException(Exception):
 def dataToSQL(columns, datalist, table, cursor):
 	query = 'insert into %s ({0}) values ({1})' % (table)
 	query = query.format(','.join(columns), ','.join('?' * len(columns)))
+	print(table)
 	for data in datalist:
 		cursor.execute(query, list(data.values()))
 
@@ -111,7 +112,7 @@ def dbCreatorImpl(connection):
 	disciplines = getDisciplines(activites)
 	niveaux = getNiveaux(activites)
 
-	removeWhitespaces([installations, equipements, activites, communes, disciplines, niveaux])
+	removeWhitespaces([installations, equipements, activites, disciplines, niveaux])
 
 	tables = {'communes':{'primary_key': 'ComInsee', 'foreign_keys':[], 'values':communes},
 	'disciplines':{'primary_key': 'ActCode', 'foreign_keys':[], 'values':disciplines},
@@ -130,6 +131,7 @@ def dbCreator(dbPath):
 		connection.commit()
 	except Exception as e:
 		connection.rollback()
+
 
 def select(attribute, tableName, dbFile):
     if os.path.isfile(dbFile):
@@ -273,8 +275,4 @@ def checkDesserte(numeroIns , desserte):
         print(test)
         return transformFromTupleToArray(test)
     else:
-<<<<<<< HEAD
         return ["Pas de desserte"]
-=======
-        return "Pas de desserte"
->>>>>>> a1997333185bf1ce72f2204a44ac7aeb88df6800
